@@ -38,20 +38,6 @@ def comer(id):
 def filosofo(id, rondas=3):
     """
     Representa el ciclo de vida de un filósofo: pensar -> tomar tenedores -> comer -> soltar tenedores.
-    
-    CONSIGNA:
-    Si todos los filósofos toman primero su tenedor izquierdo y luego el derecho:
-        izq = id
-        der = (id + 1) % NUM_FILOSOFOS
-    se produce un DEADLOCK (interbloqueo) si todos toman su tenedor izquierdo simultáneamente.
-    
-    TODO PARA EL ESTUDIANTE:
-    Implementa una solución para prevenir el Deadlock rompiendo una de las condiciones de Coffman
-    (por ejemplo, la 'Espera Circular' usando una estrategia asimétrica):
-    - Si el filósofo es el último (id == NUM_FILOSOFOS - 1) o es impar, que tome primero el tenedor
-      DERECHO y luego el IZQUIERDO.
-    - Los demás filósofos toman primero el IZQUIERDO y luego el DERECHO.
-    - Alternativamente, puedes usar un semáforo contador (árbitro/mozo) que permita un máximo de 4 comensales.
     """
     for _ in range(rondas):
         pensar(id)
@@ -61,17 +47,21 @@ def filosofo(id, rondas=3):
         tenedor_der = (id + 1) % NUM_FILOSOFOS
         
         # =========================================================================
-        # INICIO TODO: Implementar adquisición y liberación segura de tenedores
+        # ESTRATEGIA ASIMÉTRICA: Previene la 'Espera Circular' de Coffman
         # =========================================================================
-        # PISTA: Implementa la solución asimétrica de Dijkstra (romper Espera Circular)
-        # o utiliza un semáforo árbitro para evitar el interbloqueo (Deadlock).
-        #
-        # TODO: Adquiere los tenedores adyacentes de forma segura, invoca comer(id)
-        # y libera los tenedores:
-        pass
-        # =========================================================================
-        # FIN TODO
-        # =========================================================================
+        # El último filósofo toma primero el tenedor DERECHO y luego el IZQUIERDO.
+        # Los demás filósofos toman primero el IZQUIERDO y luego el DERECHO.
+        if id == NUM_FILOSOFOS - 1:
+            primero = tenedor_der
+            segundo = tenedor_izq
+        else:
+            primero = tenedor_izq
+            segundo = tenedor_der
+            
+        # Adquisición de tenedores ordenada
+        with tenedores[primero]:
+            with tenedores[segundo]:
+                comer(id)
 
 if __name__ == "__main__":
     print("=" * 60)
